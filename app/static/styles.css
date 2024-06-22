@@ -1,0 +1,71 @@
+html { 
+  height: 100vh;
+  overflow-x: hidden; 
+  font-family: 'arial'; 
+  font-size: .9em;
+  color: white;
+  background-color: black;
+}
+
+/*
+body {
+  margin: 10px;
+  width: 90%;
+}
+*/
+
+h3 { 
+}
+
+div.thumb {
+    position: relative;
+    display: inline-flex;
+}
+div.thumb > img {
+    width: 400px;
+    height: 300px;
+    object-fit: cover;
+}
+div.thumb > div {
+    display: none;
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    border: 1px solid white;
+}
+div.thumb > div > p {
+    color: white;
+    background-color: black;
+    font-family: monospace;
+    width: fit-content;
+    margin: 10px;
+}
+div.thumb:hover div {
+    display: block;
+}
+
+/*
+img.front:hover {
+    padding-top: 10px;
+    padding-left: 10px;
+    transform: scale(1.1);
+    transform-origin: center;
+}
+*/
+
+a, a#back { 
+  text-decoration: none; 
+  color: inherit;
+}
+a:hover { color: lightblue; }
+
+form * { margin: 5px 0; }
+
+@keyframes color-change {
+  0% { color: gray; }
+  50% { 
+    color: white; 
+    text-shadow: 2px 2px rgba(255, 255, 255, 0.3);
+  }
+  100% { color: black; }
+}

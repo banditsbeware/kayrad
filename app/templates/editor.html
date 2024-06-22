@@ -1,0 +1,48 @@
+{% extends "root.html" %}
+{% block title %}editor{% endblock %}
+{% block body %}
+
+<style> html { background-image: none; } </style>
+
+<a style='float: right' href="/logout"><i class='fas fa-angry'></i> logout</a>
+
+<div id='editor-container' style='display: grid; grid-template-columns: 300px 1fr'>
+  <div style='grid-column: 1'><ul>
+    <a href='/edit/0'>new post ++</a><br>
+    {% for post in posts %} 
+      <a href='/edit/{{ post["bid"] }}'>> {{ post["title"] }}</a><br>
+    {% endfor %} 
+  </ul></div>
+
+  <form style='grid-column: 2;' action='' method='POST'>
+
+    <input type='hidden' id='bid' name='bid' value='{% if editing %}{{ editing["bid"] }}{% endif %}'>
+    <input type='hidden' id='prevt' name='prevt' value='{% if editing %}{{ editing["title"] }}{% endif %}'>
+
+    <input id='title' name='title' placeholder='{% if editing %}{{ editing["title"] }}{% endif %}'><br>
+    <textarea id='editor' name='editor' autocomplete='off'>{% if editing %}{{ editing["body"] }}{% endif %}</textarea><br>
+
+    <label for="vis">visible?</label>
+    {% if editing and editing["visible"] == 1 %}
+      <input type='checkbox' id='vis' name='vis' checked>
+    {% else %} 
+      <input type='checkbox' id='vis' name='vis'> 
+    {% endif %}
+
+    <br><button type='submit' formaction='/save'>save</button>
+    <button style='float:right; margin-right: 25px' type='submit' formaction='/delete'>delete</button>
+  </form>
+</div>
+
+<script>
+  $('#editor-container').css('width', `${Math.floor(window.innerWidth)}px`)
+  $('#title').css('width', '95%')
+  $('#editor').css({
+    'width': `95%`,
+    'height': `${Math.floor(window.innerHeight / 2)}px`,
+    'resize': 'none'
+   })
+   $('html').append($('#editor-container'))
+</script>
+
+{% endblock %}

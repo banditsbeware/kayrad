@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel='stylesheet' href='{{ url_for("static", filename="styles.css") }}'>
+  <link rel='shortcut icon' href='{{ url_for( "static", filename="ntern.png" ) }}'>
+  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+
+  <!-- font awesome icons: https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free -->
+  <script src="https://kit.fontawesome.com/14107a141d.js" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  {% block body %}{% endblock %}
+</body>
+  <script src='{{ script }}'></script>
+</html>

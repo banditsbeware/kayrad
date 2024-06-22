@@ -1,0 +1,16 @@
+{% extends "root.html" %}
+{% block title %}kaylee{% endblock %}
+{% block body %}
+
+<h3>Kaylee Rademacher</h3>
+
+<div>
+  {% for image in images %} 
+    <div class="thumb">
+        <img src="{{ image }}"/> 
+        <div><p>imgdesc</p></div>
+    </div>
+  {% endfor %} 
+</div>
+
+{% endblock %}

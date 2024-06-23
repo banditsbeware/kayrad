@@ -11,6 +11,7 @@ login_manager.login_view = 'routes.login'
 
 def create_app():
   app = Flask( __name__ )
+  app.config[ 'UPLOAD_DIR' ] = 'uploads'
   app.config[ 'SQLALCHEMY_DATABASE_URI' ] = 'sqlite:///database.sqlite3'
   app.config[ 'SQLALCHEMY_TRACK_MODIFICATIONS' ] = False
   app.config[ 'SECRET_KEY' ] = os.urandom( 32 )
@@ -21,7 +22,7 @@ def create_app():
   from .routes import routes
   app.register_blueprint( routes, url_prefix='/' )
 
-  from .blog import blog
-  app.register_blueprint( blog, url_prefix='/' )
+# from .blog import blog
+# app.register_blueprint( blog, url_prefix='/' )
 
   return app

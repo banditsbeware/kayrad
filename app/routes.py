@@ -4,9 +4,10 @@ from random import choice, randint
 import bcrypt
 
 from flask_login import login_required, login_user, logout_user
+from werkzeug.utils import secure_filename
 
 import app
-from app.models import BlogPost, User
+from app.models import User
 from app.forms import LoginForm
 
 routes = Blueprint( 'routes', __name__ )
@@ -20,10 +21,7 @@ def index():
     h = 100 * randint(2, 4)
     images.append( f"https://picsum.photos/{w}/{h}" )
 
-  return render_template( 
-                          'index.html',
-                          images=images
-                        )
+  return render_template( 'index.html', images=images )
 
 # @routes.route( '/favicon.ico' )
 # def favicon():
@@ -38,9 +36,9 @@ def login():
     u = User.query.filter_by( name=form.name.data ).first()
 
     # encode form data as bytes and compare to the hash stored in the database
-    if bcrypt.checkpw( str.encode( form.password.data ), str.encode( u.password ) ):
+    if u and bcrypt.checkpw( str.encode( form.password.data ), str.encode( u.password ) ):
       login_user( u )
-      return redirect( request.args.get( 'next' ) or 'admin.html' )
+      return redirect( request.args.get( 'next' ) or 'admin' )
     else:
       flash( f"THAT WASN'T VERY CORRECT", "danger" )
 
@@ -52,7 +50,26 @@ def logout():
   logout_user()
   return redirect( '/' )
 
-@routes.route( '/admin' )
+
+def allowed_file( name ):
+  return '.' in name and '/' not in name
+
+@routes.route( '/admin', methods=[ 'GET', 'POST' ] )
 @login_required
-def editor():
+def admin():
+  if request.method == 'POST':
+    if 'file' not in request.files:
+      flash( "No file uploaded" )
+      return redirect( request.url )
+
+    file = request.files['file']
+
+    if file.filename == '':
+      flash( "No file selected" )
+      return redirect( request.url )
+
+    if file and allowed_file( file.filename ):
+      filename = secure_filename( file.filename )
+      file.save( os.path.join( 'app/uploads', filename ) )
+
   return render_template( 'admin.html' )

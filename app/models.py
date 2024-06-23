@@ -1,51 +1,39 @@
 from datetime import datetime
-from app import db
-from sqlalchemy.sql import func, expression
-
-##
-## needs to go away.. just using this for reference
-##
-class BlogPost( db.Model ):
-  __tablename__ = 'blogpost'
-  __table_args__ = { 'extend_existing': True }
-  bid       = db.Column( db.Integer, autoincrement=True, primary_key=True )
-  title     = db.Column( db.String(80), nullable=False )
-  body      = db.Column( db.Text, nullable=False )
-  visible   = db.Column( db.Boolean, server_default=expression.false() )
-  published = db.Column( db.DateTime, nullable=False, server_default=func.now() )
-  updated   = db.Column( db.DateTime, onupdate=func.now() )
-
-  def save( self ):
-    db.session.add( self )
-    db.session.commit()
-
-  def delete( self ):
-    db.session.delete( self )
-    db.session.commit()
-
-  def __repr__( self ):
-    return f'[Post: "{ self.title }"]'
-
-##
-## Project data model
-##
-class Project( db.Model ):
-  __tablename__ = 'project'
-  __table_args__ = { 'extend_existing': True }
-
-  project_id = db.Column( db.Integer, autoincrement=True, primary_key=True )
-  title      = db.Column( db.String(80), nullable=False )
-# stills = list?
-# description = string, optional?
-
-
-##
-## User data model
-##
 from flask_login import UserMixin
+from app import db, login_manager
+
+from typing import Set
+from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped
+from sqlalchemy.orm import mapped_column, relationship
+
+
+class Base( DeclarativeBase ):
+  pass
+
+
+class Project( Base ):
+  __tablename__ = 'project'
+
+  project_id  : Mapped[int] = mapped_column( primary_key=True )
+  title       : Mapped[str] = mapped_column( String(50), nullable=False )
+  description : Mapped[str] = mapped_column( String )
+  directory   : Mapped[str] = mapped_column( String )
+  media       : Mapped[Set["Media"]] = relationship()
+
+
+class Media( Base ):
+  __tablename__ = 'media'
+
+  media_id   : Mapped[int] = mapped_column( primary_key=True )
+  project_id : Mapped[int] = mapped_column( ForeignKey( "project.project_id" ) )
+  filename   : Mapped[str] = mapped_column( String )
+  preview    : Mapped[bool] = mapped_column( Boolean )
+
+
 class User( UserMixin, db.Model ):
   __tablename__  = 'user'
-  __table_args__ = { 'extend_existing': True }
+
   uid           = db.Column( db.Integer, autoincrement=True, primary_key=True )
   name          = db.Column( db.String( 30 ) )
   password      = db.Column( db.String( 100 ) ) # encrypted
@@ -58,7 +46,6 @@ class User( UserMixin, db.Model ):
     return f'[User, id={ self.uid }, name="{ self.name }"]'
 
 
-from app import login_manager
 @login_manager.user_loader
 def load_user( uid ):
   return User.query.get( int( uid ) )

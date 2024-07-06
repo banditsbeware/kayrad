@@ -17,33 +17,6 @@ body {
 h3 { 
 }
 
-div.thumb {
-    position: relative;
-    display: inline-flex;
-}
-div.thumb > img {
-    width: 400px;
-    height: 300px;
-    object-fit: cover;
-}
-div.thumb > div {
-    display: none;
-    position: absolute;
-    width: 400px;
-    height: 300px;
-    border: 1px solid white;
-}
-div.thumb > div > p {
-    color: white;
-    background-color: black;
-    font-family: monospace;
-    width: fit-content;
-    margin: 10px;
-}
-div.thumb:hover div {
-    display: block;
-}
-
 /*
 img.front:hover {
     padding-top: 10px;

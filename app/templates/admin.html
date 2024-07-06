@@ -2,37 +2,93 @@
 {% block title %}administrative Zone{% endblock %}
 {% block body %}
 
-<div style='text-align: center'>
-  <h3>ADMINISTRATIVE ZONE</h3>
+<style>
+div.project-media {
+    position: relative;
+    display: inline-flex;
+}
+div.project-media > img,video {
+    width: 400px;
+    height: 300px;
+    object-fit: cover;
+}
+div.project-media > div {
+    display: none;
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    border: 1px solid white;
+}
+div.project-media > div > p {
+    color: white;
+    background-color: black;
+    font-family: monospace;
+    width: fit-content;
+    margin: 10px;
+}
+div.project-media:hover div {
+    display: block;
+}
+
+td:has(label) { text-align: end; }
+
+</style>
+
+<h3>ADMINISTRATIVE ZONE</h3>
+<div style='display: grid; grid-template-columns: 300px 1fr;'>
+
+  <div style='grid-column: 1; border: 1px solid blueviolet'>
+    <a href='/project/edit/0'>Create New</a></br>
+    {% for project in projects %}
+      {% if editing and (project["p_id"] == editing["p_id"]) %}
+      *
+      {% endif %}
+      <a href='/project/edit/{{ project["p_id"] }}'>{{ project["title"] }}</a></br>
+    {% endfor %}
+  </div>
 
   <form method=post enctype=multipart/form-data>
     <input type='hidden' id='p_id' name='p_id' value='{% if editing %}{{ editing["p_id"] }}{% endif %}'>
 
-    <div style='border: 1px solid blueviolet'>
-      <a href='/project/edit/0'>Create New</a></br>
-      {% for project in projects %}
-        <a href='/project/edit/{{ project["p_id"] }}'>{{ project["title"] }}</a></br>
-      {% endfor %}
+    <div style='grid-column: 2'>
+      <table>
+        <tr>
+          <td><label for='title'>title &rarr;</label></td>
+          <td><input required id='title' name='title' 
+            value='{% if editing %}{{ editing["title"] }}{% endif %}'></td>
+        </tr>
+        <tr>
+          <td><label for='description'>description &rarr;</label></td>
+          <td><textarea id='description' name='description' 
+            autocomplete='off'>{% if editing %}{{ editing["description"] }}{% endif %}</textarea></td>
+        </tr>
+        <tr>
+          <td><label for='files'>upload files &rarr;</label></td>
+          <td><input type=file name=files multiple=multiple /></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><button type='submit' formaction='/project/save'>save</button>
+              <button type='submit' formaction='/project/delete'>delete</button></td>
+        </tr>
+      </table>
     </div>
 
-    <input required 
-      id='title' 
-      name='title' 
-      value='{% if editing %}{{ editing["title"] }}{% endif %}'><br>
-
-    <textarea 
-      id='description' 
-      name='description' 
-      autocomplete='off'>{% if editing %}{{ editing["description"] }}{% endif %}</textarea><br>
-
-    <input type=file name=files multiple=multiple />
-
-    <button type='submit' formaction='/project/save'>save</button>
-    <button type='submit' formaction='/project/delete'>delete</button>
-
-    {% for m in media %}
-      <img src='{{ m }}'/>
+    {% if editing %}
+    <div style='grid-column: 1; grid-row: 2'>
+    {% for media in editing.media %}
+      {% set src = url_for( "static", filename="projects/"+editing.title+"/"+media.filename ) %}
+      <div class='project-media'>
+        {% if media.filename.endswith("mov") %}
+        <video width=140 src='{{ src }}'></video>
+        {% else %}
+        <img width=140 src='{{ src }}'/>
+        {% endif %}
+        <div><p>{{ media.filename }}</p></div>
+      </div>
     {% endfor %}
+    </div>
+    {% endif %}
   </form>
 </div>
 

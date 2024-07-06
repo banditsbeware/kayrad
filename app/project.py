@@ -1,6 +1,6 @@
 import shutil
 import os
-from flask import Blueprint, render_template, redirect, request
+from flask import Blueprint, render_template, redirect, request, url_for
 from flask_login import current_user, login_required 
 
 import app
@@ -8,8 +8,10 @@ from app.models import User, Project, Media
 
 project = Blueprint( 'project', __name__ )
 
+PROJECT_DIR = "app/static/projects"
+
 @project.route( '/' )
-# @login_required
+@login_required
 def root():
   return render_template( 'admin.html', 
     projects=Project.query.all()
@@ -17,33 +19,25 @@ def root():
 #
 
 @project.route( '/edit/<int:p_id>' )
-# @login_required
+@login_required
 def edit( p_id ):
   if p_id == 0:
     return redirect( '/project' )
   #
-  p_editing = Project.query.get( p_id )
-
-  media = list()
-  for m in Media.query.filter_by( p_id=p_id ).all():
-    media.append( os.path.join( p_editing.directory, m.filename ) )
-  #
-
   return render_template( 'admin.html', 
-    editing=p_editing, 
-    projects=Project.query.all(),
-    media=media
+    editing=Project.query.get( p_id ), 
+    projects=Project.query.all()
   )
 #
 
 @project.route( '/save', methods=['POST'] )
-# @login_required
+@login_required
 def save():
   project = None
   p_id         = request.form.get( 'p_id' )
   _title       = request.form.get( 'title' )
   _description = request.form.get( 'description' )
-  _directory   = f"instance/uploads/{ _title }"
+  _directory   = os.path.join( PROJECT_DIR, _title )
 
   # match a preexisting title
   if (_project := Project.query.filter_by( title=_title ).first()):
@@ -57,50 +51,43 @@ def save():
     # if the title changed, move files to the new directory
     orig_directory = project.directory
     if _directory != orig_directory:
-      print( f"'{_directory}' != '{orig_directory}'")
-      shutil.move( orig_directory, _directory )      
+      shutil.move( orig_directory, _directory)      
     #
   #
   else:
     # create a new project
     project = Project()
-    print( f"creating new project")
     os.makedirs( _directory )
   #
 
   project.title       = _title
   project.description = _description 
   project.directory   = _directory
+  if not project.media: project.media = set()
   project.save()
 
-  print( f"project {project.p_id}")
-
-  files = request.files.getlist("files")
-  for f in files:
-    if f.filename:
+  files = request.files.getlist( "files" )
+  for file_data in files:
+    if file_data.filename:
       media = Media()
       media.p_id = project.p_id
-      media.filename = f.filename
+      media.filename = file_data.filename
       media.preview = True # request.form.get( 'preview' ) is not None
-      f.save( os.path.join( _directory, f.filename ) )
-      media.save()
+      media.save( file_data=file_data )
+      project.media.add( media )
     #
   #
-  return redirect( '/project' )
+  return redirect( url_for( "project.edit", p_id=project.p_id ) )
 #
 
 @project.route( '/delete', methods=['POST'] )
-# @login_required
+@login_required
 def delete():
   p_id = request.form.get( 'p_id' )
   if p_id: 
     project = Project.query.get( p_id ) 
-
-    # well.. it really should exist...
-    if os.path.exists( project.directory ):
-      shutil.rmtree( project.directory )
-
     project.delete()
+  #
   return edit( 0 )
 #
 

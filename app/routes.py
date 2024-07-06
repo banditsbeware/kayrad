@@ -14,14 +14,7 @@ routes = Blueprint( 'routes', __name__ )
 
 @routes.route( '/', methods=[ 'GET', 'POST' ] )
 def index():
-  images = list()
-
-  for _ in range( 20 ):
-    w = 100 * randint(2, 4)
-    h = 100 * randint(2, 4)
-    images.append( f"https://picsum.photos/{w}/{h}" )
-  #
-  return render_template( 'index.html', images=images )
+  return render_template( 'index.html', projects=Project.query.all() )
 #
 
 # @routes.route( '/favicon.ico' )

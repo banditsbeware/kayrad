@@ -1,3 +1,4 @@
+import shutil
 import os
 from flask_login import UserMixin
 from app import db, login_manager
@@ -19,11 +20,20 @@ class Project( db.Model ):
   def save( self ):
     db.session.add( self )
     db.session.commit()
+  #
 
   def delete( self ):
+    for m in self.media: m.delete()
+
+    # well.. it really should exist...
+    if os.path.exists( self.directory ):
+      shutil.rmtree( self.directory )
+    #
+
     db.session.delete( self )
     db.session.commit()
-
+  #
+#
 
 class Media( db.Model ):
   __tablename__ = 'media'
@@ -33,18 +43,25 @@ class Media( db.Model ):
   filename   : Mapped[str] = mapped_column( String )
   preview    : Mapped[bool] = mapped_column( Boolean )
 
-  def save( self ):
+  def save( self, file_data ):
+    project = Project.query.get( self.p_id )
+
+    file_data.save( os.path.join( project.directory, file_data.filename ) )
     db.session.add( self )
     db.session.commit()
+  #
 
   def delete( self ):
     project = Project.query.get( self.p_id )
-    path = os.path.join( project.directory, self.filename )
-    # delete file
+
+    m_path = os.path.join( project.directory, self.filename )
+    if os.path.exists( m_path ):
+      os.remove( m_path )
+    #
     db.session.delete( self )
     db.session.commit()
-
-
+  #
+#
 
 class User( UserMixin, db.Model ):
   __tablename__  = 'user'
@@ -56,11 +73,14 @@ class User( UserMixin, db.Model ):
 
   def get_id( self ):
     return self.uid
+  #
 
   def __repr__( self ):
     return f'[User, id={ self.uid }, name="{ self.name }"]'
-
+  #
+#
 
 @login_manager.user_loader
 def load_user( uid ):
   return User.query.get( int( uid ) )
+#

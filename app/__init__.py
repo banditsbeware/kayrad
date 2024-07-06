@@ -3,7 +3,10 @@ from flask import Flask, Blueprint, render_template, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
-db = SQLAlchemy()
+from sqlalchemy.orm import DeclarativeBase
+class Base( DeclarativeBase ): pass
+
+db = SQLAlchemy( model_class=Base )
 
 login_manager = LoginManager()
 login_manager.session_protection = 'basic'
@@ -22,7 +25,7 @@ def create_app():
   from .routes import routes
   app.register_blueprint( routes, url_prefix='/' )
 
-# from .blog import blog
-# app.register_blueprint( blog, url_prefix='/' )
+  from .project import project
+  app.register_blueprint( project, url_prefix='/project' )
 
   return app

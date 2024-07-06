@@ -1,34 +1,49 @@
-from datetime import datetime
+import os
 from flask_login import UserMixin
 from app import db, login_manager
 
 from typing import Set
 from sqlalchemy import String, Boolean, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped
+from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column, relationship
 
-
-class Base( DeclarativeBase ):
-  pass
-
-
-class Project( Base ):
+class Project( db.Model ):
   __tablename__ = 'project'
 
-  project_id  : Mapped[int] = mapped_column( primary_key=True )
+  p_id        : Mapped[int] = mapped_column( primary_key=True )
   title       : Mapped[str] = mapped_column( String(50), nullable=False )
   description : Mapped[str] = mapped_column( String )
   directory   : Mapped[str] = mapped_column( String )
   media       : Mapped[Set["Media"]] = relationship()
 
+  def save( self ):
+    db.session.add( self )
+    db.session.commit()
 
-class Media( Base ):
+  def delete( self ):
+    db.session.delete( self )
+    db.session.commit()
+
+
+class Media( db.Model ):
   __tablename__ = 'media'
 
   media_id   : Mapped[int] = mapped_column( primary_key=True )
-  project_id : Mapped[int] = mapped_column( ForeignKey( "project.project_id" ) )
+  p_id       : Mapped[int] = mapped_column( ForeignKey( "project.p_id" ) )
   filename   : Mapped[str] = mapped_column( String )
   preview    : Mapped[bool] = mapped_column( Boolean )
+
+  def save( self ):
+    db.session.add( self )
+    db.session.commit()
+
+  def delete( self ):
+    project = Project.query.get( self.p_id )
+    path = os.path.join( project.directory, self.filename )
+    # delete file
+    db.session.delete( self )
+    db.session.commit()
+
 
 
 class User( UserMixin, db.Model ):

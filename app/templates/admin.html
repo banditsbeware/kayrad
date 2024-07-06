@@ -2,15 +2,38 @@
 {% block title %}administrative Zone{% endblock %}
 {% block body %}
 
-<h3>ADMIN</h3>
+<div style='text-align: center'>
+  <h3>ADMINISTRATIVE ZONE</h3>
 
-<div>
-  whoopdy doo, your login works!!
+  <form method=post enctype=multipart/form-data>
+    <input type='hidden' id='p_id' name='p_id' value='{% if editing %}{{ editing["p_id"] }}{% endif %}'>
+
+    <div style='border: 1px solid blueviolet'>
+      <a href='/project/edit/0'>Create New</a></br>
+      {% for project in projects %}
+        <a href='/project/edit/{{ project["p_id"] }}'>{{ project["title"] }}</a></br>
+      {% endfor %}
+    </div>
+
+    <input required 
+      id='title' 
+      name='title' 
+      value='{% if editing %}{{ editing["title"] }}{% endif %}'><br>
+
+    <textarea 
+      id='description' 
+      name='description' 
+      autocomplete='off'>{% if editing %}{{ editing["description"] }}{% endif %}</textarea><br>
+
+    <input type=file name=files multiple=multiple />
+
+    <button type='submit' formaction='/project/save'>save</button>
+    <button type='submit' formaction='/project/delete'>delete</button>
+
+    {% for m in media %}
+      <img src='{{ m }}'/>
+    {% endfor %}
+  </form>
 </div>
-
-<form method=post enctype=multipart/form-data>
-  <input type=file name=file>
-  <input type=submit name=Upload>
-</form>
 
 {% endblock %}

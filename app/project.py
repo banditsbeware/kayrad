@@ -1,14 +1,14 @@
 import shutil
 import os
-from flask import Blueprint, render_template, redirect, request, url_for
+from flask import Blueprint, current_app, render_template, redirect, request, url_for
 from flask_login import current_user, login_required 
 
-import app
 from app.models import User, Project, Media
 
 project = Blueprint( 'project', __name__ )
 
-PROJECT_DIR = "app/static/projects"
+def project_directory( dir ):
+    return os.path.join( current_app.root_path, f"static/projects/{ dir }" )
 
 @project.route( '/' )
 @login_required
@@ -37,7 +37,7 @@ def save():
   p_id         = request.form.get( 'p_id' )
   _title       = request.form.get( 'title' )
   _description = request.form.get( 'description' )
-  _directory   = os.path.join( PROJECT_DIR, _title )
+  _directory   = project_directory( _title )
 
   # match a preexisting title
   if (_project := Project.query.filter_by( title=_title ).first()):

@@ -91,11 +91,8 @@ def delete():
   return edit( 0 )
 #
 
-# @project.route( '/post/<int:i>' )
-# def post( i ):
-#   p = Project.query.get( i )
-#   return render_template( 'post.html', 
-#     back=True, 
-#     title=p.title, 
-#     body=p.body 
-#   )
+@project.route( '/<int:p_id>' )
+def view_project( p_id ):
+    project = Project.query.get( p_id )
+    return render_template( 'project.html', project=project )
+

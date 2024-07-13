@@ -1,0 +1,23 @@
+{% extends "root.html" %}
+{% block title %}{{ project.title }}{% endblock %}
+{% block body %}
+
+<style>
+</style>
+
+<h1>{{ project.title }}</h1>
+
+<div class='project-section'>
+  <p>{{ project.description }}</p>
+  {% for media in project.media %}
+    {% set src = url_for( "static", filename="projects/"+project.title+"/"+media.filename ) %}
+      {% if media.filename.endswith("mov") %}
+      <video width=140 src='{{ src }}'></video>
+      {% else %}
+      <img width=140 src='{{ src }}'/>
+      {% endif %}
+  {% endfor %}
+</div><!--project-section-->
+
+{% endblock %}
+

@@ -3,29 +3,92 @@
 {% block body %}
 
 <style>
-div.project-section {
+.tab {
+  padding: 5px;
+  cursor: pointer;
+  display: inline-block;
+}
+.radio { display: none; }
+.tab-content { display: none; }
+
+#radio-work:checked ~ .tab-contents #work-tab-content,
+#radio-pleasure:checked ~ .tab-contents #pleasure-tab-content,
+#radio-blog:checked ~ .tab-contents #blog-tab-content {
+  display: block;
+}
+#radio-work:checked ~ .tabs #work-tab,
+#radio-pleasure:checked ~ .tabs #pleasure-tab,
+#radio-blog:checked ~ .tabs #blog-tab {
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+  background: #000;
+}
+.tab-contents {
+  margin-top: -1px;
+  border-top: 1px solid #fff;
+}
+div.project-images {
+  overflow: auto;
+  white-space: nowrap;
+}
+div.project-images img, video {
+  height: 250px;
+  object-fit: cover;
+  padding: 3px;
 }
 </style>
 
 <h1>Kaylee Rademacher</h1>
 
-{% if projects %}
-<div>
-  {% for project in projects %} 
-    <div class='project-section'>
-      <h2>{{ project.title }}</h2>
-      <p>{{ project.description }}</p>
-      {% for media in project.media %}
-        {% set src = url_for( "static", filename="projects/"+project.title+"/"+media.filename ) %}
-          {% if media.filename.endswith("mov") %}
-          <video width=140 src='{{ src }}'></video>
-          {% else %}
-          <img width=140 src='{{ src }}'/>
-          {% endif %}
-      {% endfor %}
-    </div><!--project-section-->
-  {% endfor %} 
+<p>this is the top-level description</p>
+
+<input class="radio" id="radio-work"     name="group" type="radio" checked>
+<input class="radio" id="radio-pleasure" name="group" type="radio">
+<input class="radio" id="radio-blog"     name="group" type="radio">
+
+<div class="tabs">
+  <label class="tab" id="work-tab"     for="radio-work">work</label>
+  <label class="tab" id="pleasure-tab" for="radio-pleasure">pleasure</label>
+  <label class="tab" id="blog-tab"     for="radio-blog">blog</label>
 </div>
-{% endif %}
+
+<div class='tab-contents'>
+
+  <div class='tab-content' id='work-tab-content'>
+    {% if projects %}
+    <div>
+      {% for project in projects %} 
+        <div class='project-section'>
+          <h2><a href='/project/{{ project.p_id }}'/>{{ project.title }}</a></h2>
+          <p>{{ project.description }}</p>
+
+          <div class='project-images'>
+          {% for media in project.media %}
+            {% set src = url_for( "static", filename="projects/"+project.title+"/"+media.filename ) %}
+              {% if media.filename.endswith("mov") %}
+              <video src='{{ src }}'></video>
+              {% else %}
+              <img src='{{ src }}'/>
+              {% endif %}
+          {% endfor %}
+          </div><!--project-images-->
+
+        </div><!--project-section-->
+        <hr />
+      {% endfor %} 
+    </div>
+    {% endif %}
+  </div><!--work-tab-content-->
+
+  <div class='tab-content' id='pleasure-tab-content'>
+    <p>this is the about tab</p>
+  </div><!--pleasure-tab-content-->
+
+  <div class='tab-content' id='blog-tab-content'>
+    <p>this is the blog tab</p>
+  </div><!--blog-tab-content-->
+
+</div><!--tab-contents-->
 
 {% endblock %}

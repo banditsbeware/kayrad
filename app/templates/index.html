@@ -39,7 +39,9 @@ div.project-images img, video {
 }
 </style>
 
-<h1>Kaylee Rademacher</h1>
+<h1>Kaylee Rademacher
+{% if current_user.is_authenticated %} <a href=/project>🛠️</a> {% endif %}
+</h1>
 
 <p>this is the top-level description</p>
 

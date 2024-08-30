@@ -11,11 +11,13 @@
 .radio { display: none; }
 .tab-content { display: none; }
 
+#radio-home:checked ~ .tab-contents #home-tab-content,
 #radio-work:checked ~ .tab-contents #work-tab-content,
 #radio-pleasure:checked ~ .tab-contents #pleasure-tab-content,
 #radio-blog:checked ~ .tab-contents #blog-tab-content {
   display: block;
 }
+#radio-home:checked ~ .tabs #home-tab,
 #radio-work:checked ~ .tabs #work-tab,
 #radio-pleasure:checked ~ .tabs #pleasure-tab,
 #radio-blog:checked ~ .tabs #blog-tab {
@@ -30,23 +32,29 @@
 }
 </style>
 
-<h1>Kaylee Rademacher
-{% if current_user.is_authenticated %} <a href=/project>🛠️</a> {% endif %}
-</h1>
+<div>
+  <h1>kaylee rademacher
+  {% if current_user.is_authenticated %} <a href=/project>🛠️</a> {% endif %}
+  </h1>
+</div>
 
-<p>this is the top-level description</p>
-
-<input class="radio" id="radio-work"     name="group" type="radio" checked>
+<input class="radio" id="radio-home"     name="group" type="radio" checked>
+<input class="radio" id="radio-work"     name="group" type="radio">
 <input class="radio" id="radio-pleasure" name="group" type="radio">
 <input class="radio" id="radio-blog"     name="group" type="radio">
 
 <div class="tabs">
+  <label class="tab" id="home-tab"     for="radio-home">home</label>
   <label class="tab" id="work-tab"     for="radio-work">work</label>
   <label class="tab" id="pleasure-tab" for="radio-pleasure">pleasure</label>
   <label class="tab" id="blog-tab"     for="radio-blog">blog</label>
 </div>
 
 <div class='tab-contents'>
+
+  <div class='tab-content' id='home-tab-content'>
+    <video style='display: block; margin: auto; width: 70%' src='{{ url_for( "static", filename="testreel.mp4" ) }}'></video>
+  </div><!--home-tab-content-->
 
   <div class='tab-content' id='work-tab-content'>
     {% if projects %}
@@ -58,7 +66,7 @@
             {% if project["ptype"] %} - <em>{{ project["ptype"] }}</em> {% endif %}
           </h2>
 
-          <p>{{ project["description"] }}</p>
+          <p class='project-description'>{{ project["description"] }}</p>
 
           <div class='project-images'>
           {% for filename in project["stills"] %}

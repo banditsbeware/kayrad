@@ -6,7 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{% endblock %}</title>
   <link rel='stylesheet' href='{{ url_for("static", filename="styles.css") }}'>
-  <link rel='shortcut icon' href='{{ url_for( "static", filename="ntern.png" ) }}'>
+  <!-- <link rel='shortcut icon' href='{{ url_for( "static", filename="ntern.png" ) }}'> -->
+
+  <link rel="preload" href="static/fonts/Modum.woff2" as="font" type="font/woff2" crossorigin>
+
   <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 
   <!-- font awesome icons: https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free -->

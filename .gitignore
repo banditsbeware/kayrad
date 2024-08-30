@@ -4,3 +4,4 @@
 **.DS_Store
 instance
 app/static/projects
+config.ini

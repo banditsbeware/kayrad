@@ -34,6 +34,16 @@ a:hover { color: lightblue; }
 
 form * { margin: 5px 0; }
 
+div.project-images {
+  overflow: auto;
+  white-space: nowrap;
+}
+div.project-images img {
+  height: 250px;
+  object-fit: cover;
+  padding: 3px;
+}
+
 @keyframes color-change {
   0% { color: gray; }
   50% { 

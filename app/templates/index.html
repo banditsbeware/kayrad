@@ -28,15 +28,6 @@
   margin-top: -1px;
   border-top: 1px solid #fff;
 }
-div.project-images {
-  overflow: auto;
-  white-space: nowrap;
-}
-div.project-images img, video {
-  height: 250px;
-  object-fit: cover;
-  padding: 3px;
-}
 </style>
 
 <h1>Kaylee Rademacher
@@ -62,17 +53,16 @@ div.project-images img, video {
     <div>
       {% for project in projects %} 
         <div class='project-section'>
-          <h2><a href='/project/{{ project.p_id }}'/>{{ project.title }}</a></h2>
-          <p>{{ project.description }}</p>
+          <h2>
+            <a href='/project/{{ project["_id"] }}'>"{{ project["title"] }}"</a>
+            {% if project["ptype"] %} - <em>{{ project["ptype"] }}</em> {% endif %}
+          </h2>
+
+          <p>{{ project["description"] }}</p>
 
           <div class='project-images'>
-          {% for media in project.media %}
-            {% set src = url_for( "static", filename="projects/"+project.title+"/"+media.filename ) %}
-              {% if media.filename.endswith("mov") %}
-              <video src='{{ src }}'></video>
-              {% else %}
-              <img src='{{ src }}'/>
-              {% endif %}
+          {% for filename in project["stills"] %}
+            <img src='{{ url_for( "static", filename="projects/"+project["title"]+"/"+filename ) }}'/>
           {% endfor %}
           </div><!--project-images-->
 

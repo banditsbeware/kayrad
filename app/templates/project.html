@@ -3,20 +3,30 @@
 {% block body %}
 
 <style>
+  video {
+    display: block;
+    margin: auto;
+    width: 80%;
+    max-width: 950px;
+  }
 </style>
 
-<h1>{{ project.title }}</h1>
+<h1>"{{ project["title"] }}"
+  {% if project["ptype"] %} - <em>{{ project["ptype"] }}</em> {% endif %}
+  {% if current_user.is_authenticated %} <a href='/project/edit/{{ project["_id"] }}'>🛠️</a> {% endif %}
+</h1>
 
-<div class='project-section'>
-  <p>{{ project.description }}</p>
-  {% for media in project.media %}
-    {% set src = url_for( "static", filename="projects/"+project.title+"/"+media.filename ) %}
-      {% if media.filename.endswith("mov") %}
-      <video width=140 src='{{ src }}'></video>
-      {% else %}
-      <img width=140 src='{{ src }}'/>
-      {% endif %}
+<div>
+  <p>{{ project["description"] }}</p>
+  <p>{{ project["details"] }}</p>
+  {% if project["video"] %}
+    <video src='{{ url_for( "static", filename="projects/"+project["title"]+"/"+project["video"] ) }}'></video></br>
+  {% endif %}
+  <div class='project-images'>
+  {% for filename in project["stills"] %}
+    <img src='{{ url_for( "static", filename="projects/"+project["title"]+"/"+filename ) }}'/>
   {% endfor %}
+  </div><!--project-images-->
 </div><!--project-section-->
 
 {% endblock %}

@@ -3,18 +3,17 @@ from flask import Blueprint, render_template, redirect, request, send_from_direc
 from random import choice, randint
 import bcrypt
 
-from flask_login import login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.utils import secure_filename
 
-from app import db
-from app.models import User, Project, Media
+from app.db import *
 from app.forms import LoginForm
 
 routes = Blueprint( 'routes', __name__ )
 
 @routes.route( '/', methods=[ 'GET', 'POST' ] )
 def index():
-  return render_template( 'index.html', projects=Project.query.all() )
+    return render_template( 'index.html', projects=db.projects.find() )
 #
 
 # @routes.route( '/favicon.ico' )
@@ -23,27 +22,27 @@ def index():
 
 @routes.route( '/login', methods=[ 'GET', 'POST' ] )
 def login():
-  form = LoginForm()
+    form = LoginForm()
 
-  # /login is hit again when the form is submitted
-  if form.validate_on_submit():
-    u = User.query.filter_by( name=form.name.data ).first()
+    # /login is hit again when the form is submitted
+    if form.validate_on_submit():
+        user_json = db.users.find_one( { "name": form.name.data } )
 
-    # encode form data as bytes and compare to the hash stored in the database
-    if u and bcrypt.checkpw( str.encode( form.password.data ), str.encode( u.password ) ):
-      login_user( u )
-      return redirect( request.args.get( 'next' ) or 'admin' )
+        # encode form data as bytes and compare to the hash stored in the database
+        if user_json and bcrypt.checkpw( form.password.data.encode(), user_json['password'] ):
+            login_user( User( user_json ) )
+            return redirect( request.args.get( 'next' ) or 'project' )
+        #
+        else:
+            flash( f"THAT WASN'T VERY CORRECT", "danger" )
+        #
     #
-    else:
-      flash( f"THAT WASN'T VERY CORRECT", "danger" )
-    #
-  #
-  return render_template( 'login.html', form=form )
+    return render_template( 'login.html', form=form )
 #
 
 @routes.route( '/logout' )
 @login_required
 def logout():
-  logout_user()
-  return redirect( '/' )
+    logout_user()
+    return redirect( '/' )
 #

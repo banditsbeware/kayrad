@@ -47,18 +47,18 @@ td:has(label) { text-align: end; }
         {% for project in projects %}
           <li>
             {% if editing and (project["p_id"] == editing["p_id"]) %}<u>{% endif %}
-            <a href='/project/edit/{{ project["p_id"] }}'>{{ project["title"] }}</a>
-            {% if editing and (project["p_id"] == editing["p_id"]) %}</u>{% endif %}
+            <a href='/project/edit/{{ project["_id"] }}'>{{ project["title"] }}</a>
+            {% if editing and (project["_id"] == editing["_id"]) %}</u>{% endif %}
           </li>
         {% endfor %}
-        <li><a href='/project/edit/0'>Create New</a></li>
+        <li><a href='/project/edit/new'>Create New</a></li>
       </ul>
     </div>
 
 
     <div style='grid-column: 2'>
       {% if editing %}
-      <h2>EDIT <em>{{ editing.title.upper() }}</em></h2>
+      <h2>EDIT "{{ editing.title.upper() }}"</h2>
       {% else %}
       <h2>NEW PROJECT</h2>
       {% endif %}
@@ -67,6 +67,11 @@ td:has(label) { text-align: end; }
           <td><label for='title'>title &rarr;</label></td>
           <td><input required id='title' name='title' 
             value='{% if editing %}{{ editing["title"] }}{% endif %}'></td>
+        </tr>
+        <tr>
+          <td><label for='ptype'>type &rarr;</label></td>
+          <td><input id='ptype' name='ptype'
+            value='{% if editing %}{{ editing["ptype"] }}{% endif %}'></td>
         </tr>
         <tr>
           <td><label for='description'>description &rarr;</label></td>
@@ -94,25 +99,25 @@ td:has(label) { text-align: end; }
       </table>
     </div>
 
-    {% if editing %}{% set dir="projects/"+editing.title+"/" %}
+    {% if editing %}{% set dir='projects/'+editing["title"]+'/' %}
     <div style='grid-column: 1; grid-column-end: 3; grid-row: 2'>
 
-      {% if editing.video %}
+      {% if editing["video"] %}
       <h2>VIDEO</h2>
-      <p>{{ editing.video.filename }} <a href="/project/delete-media/{{ editing.video.media_id }}">❌</a></p>
+      <p>{{ editing["video"] }} <a href='/project/delete-file/{{ editing["_id"] }}/{{ editing["video"] }}'> ❌</a></p>
       <div class='project-still'>
-        <video type="video/mp4">
-          <source src='{{ url_for( "static", filename=dir+editing.video.filename) }}'>
+        <video type='video/mp4'>
+          <source src='{{ url_for( "static", filename=dir+editing["video"]) }}'>
         </video>
       </div>
       {% endif %}
 
-      {% if editing.stills %}
+      {% if editing["stills"] %}
         <h2>STILLS</h2>
-        {% for still in editing.stills %}
+        {% for filename in editing["stills"] %}
         <div class='project-still'>
-          <img src='{{ url_for( "static", filename=dir+still.filename ) }}'/>
-          <div><p>{{ still.filename }}<a href="/project/delete-media/{{ still.media_id }}">❌</a></p></div>
+          <img src='{{ url_for( "static", filename=dir+filename ) }}'/>
+          <div><p>{{ filename }}<a href='/project/delete-file/{{ editing["_id"] }}/{{ filename }}'> ❌</a></p></div>
         </div>
         {% endfor %}
       {% endif %}

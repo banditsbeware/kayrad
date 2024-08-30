@@ -1,98 +1,160 @@
+from bson.objectid import ObjectId
+
 import shutil
 import os
 from flask import Blueprint, current_app, render_template, redirect, request, url_for
 from flask_login import current_user, login_required 
 
-from app.models import User, Project, Media
+from app.db import *
 
 project = Blueprint( 'project', __name__ )
 
 def project_directory( dir ):
     return os.path.join( current_app.root_path, f"static/projects/{ dir }" )
+#
 
+# base case for administering the database
 @project.route( '/' )
 @login_required
 def root():
-  return render_template( 'admin.html', 
-    projects=Project.query.all()
-  )
+    return render_template( 'admin-project.html', projects=db.projects.find() )
 #
 
-@project.route( '/edit/<int:p_id>' )
-@login_required
-def edit( p_id ):
-  if p_id == 0:
-    return redirect( '/project' )
-  #
-  return render_template( 'admin.html', 
-    editing=Project.query.get( p_id ), 
-    projects=Project.query.all()
-  )
-#
-
-@project.route( '/save', methods=['POST'] )
+@project.post( '/save' )
 @login_required
 def save():
-  project = None
-  p_id         = request.form.get( 'p_id' )
-  _title       = request.form.get( 'title' )
-  _description = request.form.get( 'description' )
-  _directory   = project_directory( _title )
+    project      = None
+    p_id         = request.form.get( 'p_id' )
+    title        = request.form.get( 'title' )
+    ptype        = request.form.get( 'ptype' )
+    description  = request.form.get( 'description' )
+    details      = request.form.get( 'details' )
+    video        = None
+    stills       = list()
 
-  # match a preexisting title
-  if (_project := Project.query.filter_by( title=_title ).first()):
-    p_id = _project.p_id
-  #
-
-  if p_id:
-    # edit an existing project
-    project = Project.query.get( p_id )
-
-    # if the title changed, move files to the new directory
-    orig_directory = project.directory
-    if _directory != orig_directory:
-      shutil.move( orig_directory, _directory)      
+    # match a preexisting title
+    if (_project := db.projects.find_one( { "title": title } )):
+        p_id = _project["_id"]
     #
-  #
-  else:
-    # create a new project
-    project = Project()
-    os.makedirs( _directory )
-  #
 
-  project.title       = _title
-  project.description = _description 
-  project.directory   = _directory
-  if not project.media: project.media = set()
-  project.save()
+    # p_id came from the form (editing a project), or by looking up the title.
+    # this ensures that "Create New" won't make a duplicate project if you re-use a title.
+    # it assumes that you actually want to edit that project.
+    if p_id:
+        # edit an existing project
+        project = db.projects.find_one( { "_id": ObjectId( p_id ) } )
 
-  files = request.files.getlist( "files" )
-  for file_data in files:
-    if file_data.filename:
-      media = Media()
-      media.p_id = project.p_id
-      media.filename = file_data.filename
-      media.preview = True # request.form.get( 'preview' ) is not None
-      media.save( file_data=file_data )
-      project.media.add( media )
+        # if the title changed, move files to the new directory
+        orig_title = project["title"]
+        if title != orig_title:
+            shutil.move( project_directory( orig_title ), project_directory( title ) )      
+        #
+        if "video"  in project: video  = project["video"]
+        if "stills" in project: stills = project["stills"]
     #
-  #
-  return redirect( url_for( "project.edit", p_id=project.p_id ) )
+    else:
+        # create directory for the new project - video & stills are still empty here
+        try:
+            os.makedirs( project_directory( title ) )
+        #
+        except FileExistsError: pass
+    #
+    # save the stills
+    fd_stills = request.files.getlist( "stills" )
+    for file_data in fd_stills:
+        if file_data.filename and file_data.filename not in stills:
+            file_data.save( os.path.join( project_directory( title ), file_data.filename ) )
+            stills.append( file_data.filename )
+        #
+    #
+    # save the video
+    fd_video  = request.files.get( "video" )
+    if fd_video.filename and fd_video.filename.endswith( ".mp4" ):
+        fd_video.save( os.path.join( project_directory( title ), fd_video.filename ) )
+        video = fd_video.filename
+    #
+    # finished constructing the new/modified project
+    project = {
+        "title"      : title,
+        "ptype"      : ptype,
+        "description": description,
+        "details"    : details,
+        "video"      : video,
+        "stills"     : stills
+    }
+    # write document to database
+    p_id = insert_or_update( project )
+
+    return edit_project( p_id )
 #
 
-@project.route( '/delete', methods=['POST'] )
+@project.route( '/edit/<p_id>' )
 @login_required
-def delete():
-  p_id = request.form.get( 'p_id' )
-  if p_id: 
-    project = Project.query.get( p_id ) 
-    project.delete()
-  #
-  return edit( 0 )
+def edit_project( p_id ):
+    try: 
+        project = db.projects.find_one( { "_id": ObjectId( p_id ) } )
+    #
+    except:
+        return root()
+    #
+    return render_template( 'admin-project.html', editing=project, projects=db.projects.find() )
 #
 
-@project.route( '/<int:p_id>' )
+@project.get( '/<p_id>' )
 def view_project( p_id ):
-    project = Project.query.get( p_id )
+    try: 
+        project = db.projects.find_one( { "_id": ObjectId( p_id ) } )
+    #
+    except:
+        return root()
+    #
     return render_template( 'project.html', project=project )
+#
 
+@project.post( '/delete' )
+@login_required
+def delete_project():
+    try: 
+        project = db.projects.find_one( { "title": request.form.get( "title" ) } )
+        if project is None: return root()
+    #
+    except:
+        return root()
+    #
+    # delete directory and all files
+    shutil.rmtree( project_directory( project["title"] ) )
+
+    # remove project document from database
+    db.projects.delete_one( { "_id": ObjectId( project["_id"] ) } )    
+
+    return root()
+#
+
+@project.route( '/delete-file/<p_id>/<filename>' )
+@login_required
+def delete_file( p_id, filename ):
+    try: 
+        project = db.projects.find_one( { "_id": ObjectId( p_id ) } )
+    #
+    except:
+        return root()
+    #
+    if filename is None or len( filename ) < 1: return root()
+
+    # find and delete the file
+    path = os.path.join( project_directory( project["title"] ), filename )
+    if os.path.exists( path ): os.remove( path )
+
+    # remove file from project object
+    try:
+        project["stills"].remove( filename )
+    #
+    except ValueError:
+        if filename.endswith( ".mp4" ): project["video"] = None
+    #
+
+    # update document in database
+    p_id = insert_or_update( project )
+
+    return edit_project( p_id )
+#

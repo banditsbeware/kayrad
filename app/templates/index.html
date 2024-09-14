@@ -33,7 +33,7 @@
 </style>
 
 <div>
-  <h1>kaylee rademacher
+  <h1 style="font-family: 'Modum'; font-size: 2.8em">kaylee rademacher
   {% if current_user.is_authenticated %} <a href=/project>🛠️</a> {% endif %}
   </h1>
 </div>
@@ -43,7 +43,7 @@
 <input class="radio" id="radio-pleasure" name="group" type="radio">
 <input class="radio" id="radio-blog"     name="group" type="radio">
 
-<div class="tabs">
+<div class="tabs" style="font-family: 'Modum'; font-size: 1.8em">
   <label class="tab" id="home-tab"     for="radio-home">home</label>
   <label class="tab" id="work-tab"     for="radio-work">work</label>
   <!-- <label class="tab" id="pleasure-tab" for="radio-pleasure">pleasure</label> -->
@@ -53,7 +53,10 @@
 <div class='tab-contents'>
 
   <div class='tab-content' id='home-tab-content'>
-    <video style='display: block; margin: auto; width: 70%' src='{{ url_for( "static", filename="testreel.mp4" ) }}'></video>
+    <video style='display: block; margin: auto; width: 70%' controls>
+      <source src='{{ url_for( "static", filename="reel.mp4" ) }}' type='video/mp4'>
+    </video>
+    <hr/>
   </div><!--home-tab-content-->
 
   <div class='tab-content' id='work-tab-content'>

@@ -29,7 +29,7 @@ def save():
     ptype        = request.form.get( 'ptype' )
     description  = request.form.get( 'description' )
     details      = request.form.get( 'details' )
-    video        = None
+    video_url    = request.form.get( 'video_url' )
     stills       = list()
 
     # match a preexisting title
@@ -49,7 +49,6 @@ def save():
         if title != orig_title:
             shutil.move( project_directory( orig_title ), project_directory( title ) )      
         #
-        if "video"  in project: video  = project["video"]
         if "stills" in project: stills = project["stills"]
     #
     else:
@@ -67,19 +66,13 @@ def save():
             stills.append( file_data.filename )
         #
     #
-    # save the video
-    fd_video  = request.files.get( "video" )
-    if fd_video.filename and fd_video.filename.endswith( ".mp4" ):
-        fd_video.save( os.path.join( project_directory( title ), fd_video.filename ) )
-        video = fd_video.filename
-    #
     # finished constructing the new/modified project
     project = {
         "title"      : title,
         "ptype"      : ptype,
         "description": description,
         "details"    : details,
-        "video"      : video,
+        "video_url"  : video_url,
         "stills"     : stills
     }
     # write document to database
@@ -150,7 +143,7 @@ def delete_file( p_id, filename ):
         project["stills"].remove( filename )
     #
     except ValueError:
-        if filename.endswith( ".mp4" ): project["video"] = None
+        pass
     #
 
     # update document in database

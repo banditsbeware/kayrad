@@ -45,10 +45,10 @@ td:has(label) { text-align: end; }
       <h2>PROJECTS</h2>
       <ul>
         {% for project in projects %}
-          <li>
-            {% if editing and (project["p_id"] == editing["p_id"]) %}<u>{% endif %}
+          {% set sel = editing and ( project["_id"] == editing["_id"] ) %}
+          <li>{% if sel %}<u>{% endif %}
             <a href='/project/edit/{{ project["_id"] }}'>{{ project["title"] }}</a>
-            {% if editing and (project["_id"] == editing["_id"]) %}</u>{% endif %}
+            {% if sel %}</u>{% endif %}
           </li>
         {% endfor %}
         <li><a href='/project/edit/new'>Create New</a></li>
@@ -57,12 +57,16 @@ td:has(label) { text-align: end; }
 
 
     <div style='grid-column: 2'>
-      {% if editing %}
-      <h2>EDIT "{{ editing.title.upper() }}"</h2>
-      {% else %}
-      <h2>NEW PROJECT</h2>
-      {% endif %}
-      <table>
+      <table style='width: 100%;'>
+        <tr>
+          <th style='width: 300px;'>
+          {% if editing %}
+          <h2>EDIT "{{ editing.title.upper() }}"</h2>
+          {% else %}
+          <h2>NEW PROJECT</h2>
+          {% endif %}
+          </th><th></th>
+        </tr>
         <tr>
           <td><label for='title'>title &rarr;</label></td>
           <td><input required id='title' name='title' 

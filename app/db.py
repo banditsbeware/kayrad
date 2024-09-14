@@ -53,7 +53,7 @@ def insert_or_update( project ):
                     "ptype"      : attr_if_exists( project, "ptype" ),
                     "description": attr_if_exists( project, "description" ),
                     "details":     attr_if_exists( project, "details" ),
-                    "video":       attr_if_exists( project, "video" ),
+                    "video_url":   attr_if_exists( project, "video_url" ),
                     "stills":      attr_if_exists( project, "stills" )
                 }
             },
